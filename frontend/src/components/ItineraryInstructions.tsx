@@ -53,7 +53,7 @@ export const ItineraryInstructions = React.memo(function ItineraryInstructions()
                 Generate AI Recommendations
               </h3>
               <p className="text-sm text-gray-600">
-                Click "Generate Itinerary" above to get AI-powered suggestions based on your 
+                Click "Generate Itinerary" above to get smart recommendations based on your 
                 preferences (cities, interests, pace), or browse places manually below.
               </p>
             </div>

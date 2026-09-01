@@ -28,7 +28,7 @@ export function HomeTab({ onGenerateWithAI, onStartFromScratch }: HomeTabProps):
               </span>
             </h1>
             <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
-              Create your dream trip with AI-powered recommendations or build it yourself from scratch. 
+              Create your dream trip with smart recommendations or build it yourself from scratch. 
               Browse curated activities and plan your perfect 3-day adventure.
             </p>
             

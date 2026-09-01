@@ -36,7 +36,7 @@ describe('ItineraryInstructions', () => {
       
       expect(screen.getByText('Generate or Create Your Itinerary')).toBeInTheDocument();
       expect(
-        screen.getByText(/Use the "Generate Recommendation" button to get AI-powered suggestions/)
+        screen.getByText(/Use the "Generate Recommendation" button to get smart recommendations/)
       ).toBeInTheDocument();
     });
 

@@ -105,7 +105,7 @@ export const LandingHero = React.memo(function LandingHero(): JSX.Element {
               </svg>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 mb-1">AI-Powered Recommendations</h3>
+              <h3 className="font-semibold text-gray-900 mb-1">Smart Recommendations</h3>
               <p className="text-sm text-gray-600">
                 Get personalized itineraries based on your preferences, interests, and travel pace
               </p>

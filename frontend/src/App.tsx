@@ -129,7 +129,7 @@ function AppContent() {
 
       // Update itinerary with the recommendation
       if (response.itinerary) {
-        // Generate a random name for the AI-generated itinerary
+        // Generate a random name for the recommended itinerary
         const randomName = generateRandomItineraryName();
         const itineraryWithRandomName = {
           ...response.itinerary,
@@ -239,7 +239,7 @@ function AppContent() {
                   </p>
 
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    {/* Generate with AI button */}
+                    {/* Generate Recommendations button */}
                     <button
                       onClick={handleGenerateWithAI}
                       className="inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all shadow-lg hover:shadow-xl"
@@ -258,7 +258,7 @@ function AppContent() {
                         />
                       </svg>
                       <div className="text-left">
-                        <div className="text-base font-semibold">Generate with AI</div>
+                        <div className="text-base font-semibold">Generate Recommendations</div>
                         <div className="text-sm text-blue-100 font-normal">
                           Get personalized recommendations
                         </div>
@@ -336,7 +336,7 @@ function AppContent() {
         </MainLayout>
       </div>
 
-      {/* Preferences Modal for Generate with AI */}
+      {/* Preferences Modal for Generating Recommendations */}
       <PreferencesModal
         isOpen={showPreferencesModal}
         onClose={() => !isGenerating && setShowPreferencesModal(false)}

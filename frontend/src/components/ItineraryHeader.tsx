@@ -460,7 +460,7 @@ export function ItineraryHeader(): JSX.Element {
                           />
                         </svg>
                         <div>
-                          <div className="text-sm font-medium text-gray-900">Generate with AI</div>
+                          <div className="text-sm font-medium text-gray-900">Generate Recommendations</div>
                           <div className="text-xs text-gray-500 mt-1">
                             Create a new itinerary based on your preferences using recommendations
                           </div>

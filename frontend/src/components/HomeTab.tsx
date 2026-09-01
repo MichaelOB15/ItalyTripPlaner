@@ -2,8 +2,8 @@
  * HomeTab component - Landing page for the Trip Planner
  * 
  * Features:
- * - Clean hero section highlighting AI and manual planning
- * - Two clear paths: AI-generated or manual building
+ * - Clean hero section highlighting smart recommendations and manual planning
+ * - Two clear paths: recommended or manual building
  * - Simple feature showcase
  * 
  * **Validates: Requirements 9.1, 14.1, 14.5, 18.1**
@@ -51,7 +51,7 @@ export function HomeTab({ onGenerateWithAI, onStartFromScratch }: HomeTabProps):
                     d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
                   />
                 </svg>
-                Generate with AI
+                Generate Recommendations
                 <span className="ml-2 px-2 py-0.5 text-xs bg-white/20 rounded-full">Recommended</span>
               </button>
               
@@ -87,7 +87,7 @@ export function HomeTab({ onGenerateWithAI, onStartFromScratch }: HomeTabProps):
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* AI Generation Card */}
+            {/* Smart Recommendations Card */}
             <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 border-2 border-blue-200">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
@@ -95,7 +95,7 @@ export function HomeTab({ onGenerateWithAI, onStartFromScratch }: HomeTabProps):
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                   </svg>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900">AI-Generated</h3>
+                <h3 className="text-2xl font-bold text-gray-900">Recommended</h3>
               </div>
               
               <p className="text-gray-700 mb-6">
@@ -113,7 +113,7 @@ export function HomeTab({ onGenerateWithAI, onStartFromScratch }: HomeTabProps):
                   <svg className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  AI selects activities automatically
+                  Smart algorithm selects activities automatically
                 </li>
                 <li className="flex items-start gap-2 text-sm text-gray-700">
                   <svg className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -127,7 +127,7 @@ export function HomeTab({ onGenerateWithAI, onStartFromScratch }: HomeTabProps):
                 onClick={onGenerateWithAI}
                 className="w-full py-3 px-6 text-white font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg transition-all shadow-md hover:shadow-lg"
               >
-                Generate with AI →
+                Generate Recommendations →
               </button>
             </div>
 

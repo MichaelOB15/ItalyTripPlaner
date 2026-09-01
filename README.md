@@ -13,7 +13,7 @@ Try it out! Create custom 3-day Italy itineraries with drag-and-drop editing and
 ## ✨ Features
 
 ### Core Functionality
-- 🎯 **AI-Powered Recommendations** - Generate optimized 3-day itineraries based on preferences (cities, interests, pace, budget)
+- 🎯 **Smart Recommendations** - Generate optimized 3-day itineraries using an intelligent scoring algorithm based on preferences (cities, interests, pace, budget)
 - 🖱️ **Interactive Editing** - Drag-and-drop activities, reorder within days, move between days
 - 🔍 **Smart Filtering** - Search and filter 100+ Italian destinations by city, type, rating, price, tags
 - 📅 **Auto-Scheduling** - Automatic time calculations with 30-minute travel buffers
@@ -273,6 +273,12 @@ Base URL: `https://qhi4rns0b0.execute-api.us-west-2.amazonaws.com/prod/`
   "includeBookingRequired": true
 }
 ```
+
+**Note:** The recommendation engine uses a scoring algorithm (not AI/ML) that:
+- Scores places based on preference matches (city +3pts, tag +2pts, price +1pt, rating bonus)
+- Clusters by city for geographic coherence
+- Schedules based on time constraints (6-10 hours depending on pace)
+- Balances for diversity and meal coverage
 
 ---
 

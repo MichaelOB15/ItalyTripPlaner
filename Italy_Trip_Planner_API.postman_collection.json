@@ -1,0 +1,349 @@
+{
+  "info": {
+    "name": "Italy Trip Planner API",
+    "description": "API endpoints for the Italy Trip Planner backend services",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://qhi4rns0b0.execute-api.us-west-2.amazonaws.com/prod",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Places",
+      "item": [
+        {
+          "name": "Get All Places",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/places",
+              "host": ["{{base_url}}"],
+              "path": ["places"]
+            },
+            "description": "Retrieves all places from the dataset"
+          }
+        },
+        {
+          "name": "Get Places with Limit",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/places?limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["places"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Maximum number of places to return"
+                }
+              ]
+            },
+            "description": "Retrieves a limited number of places"
+          }
+        },
+        {
+          "name": "Filter Places by City",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/places?cities=Rome&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["places"],
+              "query": [
+                {
+                  "key": "cities",
+                  "value": "Rome",
+                  "description": "Filter by city (comma-separated for multiple)"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Filter places by specific city"
+          }
+        },
+        {
+          "name": "Filter Places by Type",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/places?types=restaurant,museum&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["places"],
+              "query": [
+                {
+                  "key": "types",
+                  "value": "restaurant,museum",
+                  "description": "Filter by place type (comma-separated)"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Filter places by type (restaurant, museum, historic_site, etc.)"
+          }
+        },
+        {
+          "name": "Filter Places by Tags",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/places?tags=romantic,food&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["places"],
+              "query": [
+                {
+                  "key": "tags",
+                  "value": "romantic,food",
+                  "description": "Filter by tags (comma-separated)"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Filter places by tags"
+          }
+        },
+        {
+          "name": "Filter Places - Combined",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/places?cities=Florence&types=restaurant&tags=local-favorite&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["places"],
+              "query": [
+                {
+                  "key": "cities",
+                  "value": "Florence"
+                },
+                {
+                  "key": "types",
+                  "value": "restaurant"
+                },
+                {
+                  "key": "tags",
+                  "value": "local-favorite"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Combine multiple filters (AND logic between filter types)"
+          }
+        },
+        {
+          "name": "Pagination Example",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/places?limit=10&offset=20",
+              "host": ["{{base_url}}"],
+              "path": ["places"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of results per page"
+                },
+                {
+                  "key": "offset",
+                  "value": "20",
+                  "description": "Skip first N results"
+                }
+              ]
+            },
+            "description": "Paginate through results using limit and offset"
+          }
+        }
+      ],
+      "description": "Endpoints for querying and filtering places"
+    },
+    {
+      "name": "Recommendations",
+      "item": [
+        {
+          "name": "Generate Itinerary - Rome Historic",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"preferences\": {\n    \"cities\": [\"Rome\"],\n    \"interests\": [\"historic\"],\n    \"pace\": \"moderate\",\n    \"price_range\": [\"€€\"],\n    \"include_booking_required\": true\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/recommendations",
+              "host": ["{{base_url}}"],
+              "path": ["recommendations"]
+            },
+            "description": "Generate a 3-day itinerary for Rome with historic sites"
+          }
+        },
+        {
+          "name": "Generate Itinerary - Florence Art & Food",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"preferences\": {\n    \"cities\": [\"Florence\"],\n    \"interests\": [\"art\", \"food\"],\n    \"pace\": \"relaxed\",\n    \"price_range\": [\"€\", \"€€\"],\n    \"include_booking_required\": false\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/recommendations",
+              "host": ["{{base_url}}"],
+              "path": ["recommendations"]
+            },
+            "description": "Generate a relaxed Florence itinerary focused on art and food"
+          }
+        },
+        {
+          "name": "Generate Itinerary - Multi-City",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"preferences\": {\n    \"cities\": [\"Rome\", \"Florence\", \"Venice\"],\n    \"interests\": [\"historic\", \"romantic\", \"cultural\"],\n    \"pace\": \"packed\",\n    \"price_range\": [\"€€\", \"€€€\"],\n    \"include_booking_required\": true\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/recommendations",
+              "host": ["{{base_url}}"],
+              "path": ["recommendations"]
+            },
+            "description": "Generate a packed multi-city itinerary"
+          }
+        }
+      ],
+      "description": "Endpoints for generating itinerary recommendations"
+    },
+    {
+      "name": "Validation",
+      "item": [
+        {
+          "name": "Validate Valid Dataset",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"id\": \"place_999\",\n    \"name\": \"Test Restaurant\",\n    \"type\": \"restaurant\",\n    \"city\": \"Rome\",\n    \"latitude\": 41.9028,\n    \"longitude\": 12.4964,\n    \"description\": \"A test place for validation\",\n    \"hours\": \"11:00-23:00\",\n    \"duration_minutes\": 90,\n    \"price_range\": \"€€\",\n    \"rating\": 4.5,\n    \"tags\": [\"food\", \"test\"],\n    \"booking_required\": false\n  }\n]"
+            },
+            "url": {
+              "raw": "{{base_url}}/validate",
+              "host": ["{{base_url}}"],
+              "path": ["validate"]
+            },
+            "description": "Validate a complete place object with all fields"
+          }
+        },
+        {
+          "name": "Validate Minimal Dataset",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"id\": \"place_999\",\n    \"name\": \"Minimal Place\",\n    \"type\": \"restaurant\",\n    \"city\": \"Rome\",\n    \"latitude\": 41.9028,\n    \"longitude\": 12.4964\n  }\n]"
+            },
+            "url": {
+              "raw": "{{base_url}}/validate",
+              "host": ["{{base_url}}"],
+              "path": ["validate"]
+            },
+            "description": "Validate a place with only required fields (should generate warnings)"
+          }
+        },
+        {
+          "name": "Validate Place Missing Coordinates",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"id\": \"place_999\",\n    \"name\": \"Place Without Location\",\n    \"type\": \"restaurant\",\n    \"city\": \"Rome\"\n  }\n]"
+            },
+            "url": {
+              "raw": "{{base_url}}/validate",
+              "host": ["{{base_url}}"],
+              "path": ["validate"]
+            },
+            "description": "Validate place without coordinates (should include with warnings)"
+          }
+        },
+        {
+          "name": "Validate Invalid Dataset",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"name\": \"Missing Critical Fields\"\n  }\n]"
+            },
+            "url": {
+              "raw": "{{base_url}}/validate",
+              "host": ["{{base_url}}"],
+              "path": ["validate"]
+            },
+            "description": "Validate place missing critical fields (should return errors)"
+          }
+        }
+      ],
+      "description": "Endpoints for validating custom datasets"
+    }
+  ]
+}

@@ -1,0 +1,390 @@
+package com.italytrip.lambda;
+
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.italytrip.models.DayPlan;
+import com.italytrip.models.Itinerary;
+import com.italytrip.models.UserPreferences;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
+import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.PutItemResponse;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+/**
+ * Unit tests for CreateItineraryHandler.
+ * 
+ * Tests:
+ * - Successful itinerary creation with valid input
+ * - Validation of name field (required, max length)
+ * - Validation of days array (exactly 3 days required)
+ * - User ID extraction from authorizer context
+ * - DynamoDB storage with correct partition key
+ * - Error handling for invalid requests
+ * - Unique itinerary ID generation format
+ */
+@ExtendWith(MockitoExtension.class)
+class CreateItineraryHandlerTest {
+    
+    @Mock
+    private DynamoDbClient mockDynamoDb;
+    
+    @Mock
+    private Context mockContext;
+    
+    private CreateItineraryHandler handler;
+    private ObjectMapper objectMapper;
+    private static final String TEST_TABLE_NAME = "test-itineraries-table";
+    private static final String TEST_USER_ID = "test-user-123";
+    
+    @BeforeEach
+    void setUp() {
+        handler = new CreateItineraryHandler(mockDynamoDb, TEST_TABLE_NAME);
+        objectMapper = new ObjectMapper();
+    }
+    
+    /**
+     * Creates a valid test request with 3 days.
+     */
+    private APIGatewayProxyRequestEvent createValidRequest() throws Exception {
+        // Create 3 day plans
+        List<DayPlan> days = new ArrayList<>();
+        for (int i = 1; i <= 3; i++) {
+            DayPlan day = new DayPlan(i);
+            days.add(day);
+        }
+        
+        // Create preferences
+        UserPreferences preferences = new UserPreferences.Builder()
+                .addCity("Rome")
+                .addCity("Florence")
+                .addInterest("art")
+                .pace(UserPreferences.TripPace.MODERATE)
+                .build();
+        
+        // Create request object
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("name", "My Italy Adventure");
+        requestBody.put("days", days);
+        requestBody.put("preferences", preferences);
+        
+        String jsonBody = objectMapper.writeValueAsString(requestBody);
+        
+        // Create API Gateway request event
+        APIGatewayProxyRequestEvent event = new APIGatewayProxyRequestEvent();
+        event.setBody(jsonBody);
+        
+        // Set up authorizer context with user claims
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("sub", TEST_USER_ID);
+        claims.put("email", "test@example.com");
+        
+        Map<String, Object> authorizer = new HashMap<>();
+        authorizer.put("claims", claims);
+        
+        APIGatewayProxyRequestEvent.ProxyRequestContext requestContext = new APIGatewayProxyRequestEvent.ProxyRequestContext();
+        requestContext.setAuthorizer(authorizer);
+        event.setRequestContext(requestContext);
+        
+        return event;
+    }
+    
+    @Test
+    void testSuccessfulItineraryCreation() throws Exception {
+        // Arrange
+        APIGatewayProxyRequestEvent request = createValidRequest();
+        
+        when(mockDynamoDb.putItem((PutItemRequest) any()))
+                .thenReturn(PutItemResponse.builder().build());
+        
+        // Act
+        APIGatewayProxyResponseEvent response = handler.handleRequest(request, mockContext);
+        
+        // Assert
+        assertEquals(201, response.getStatusCode());
+        assertNotNull(response.getBody());
+        
+        // Verify response structure
+        Map<String, Object> responseBody = objectMapper.readValue(response.getBody(), Map.class);
+        assertTrue(responseBody.containsKey("itinerary"));
+        
+        @SuppressWarnings("unchecked")
+        Map<String, Object> itinerary = (Map<String, Object>) responseBody.get("itinerary");
+        assertEquals("My Italy Adventure", itinerary.get("name"));
+        assertNotNull(itinerary.get("id"));
+        assertTrue(((String) itinerary.get("id")).startsWith("itin_"));
+        assertNotNull(itinerary.get("created_at"));
+        assertNotNull(itinerary.get("last_modified"));
+        
+        // Verify DynamoDB was called
+        verify(mockDynamoDb, times(1)).putItem((PutItemRequest) any());
+    }
+    
+    @Test
+    void testItineraryIdFormat() throws Exception {
+        // Arrange
+        APIGatewayProxyRequestEvent request = createValidRequest();
+        
+        when(mockDynamoDb.putItem((PutItemRequest) any()))
+                .thenReturn(PutItemResponse.builder().build());
+        
+        // Act
+        APIGatewayProxyResponseEvent response = handler.handleRequest(request, mockContext);
+        
+        // Assert
+        Map<String, Object> responseBody = objectMapper.readValue(response.getBody(), Map.class);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> itinerary = (Map<String, Object>) responseBody.get("itinerary");
+        String id = (String) itinerary.get("id");
+        
+        // Verify format: itin_{timestamp}_{uuid}
+        assertTrue(id.matches("itin_\\d+_[a-f0-9]{8}"), 
+                "ID should match format 'itin_{timestamp}_{uuid}', got: " + id);
+    }
+    
+    @Test
+    void testDynamoDbStorageWithCorrectKeys() throws Exception {
+        // Arrange
+        APIGatewayProxyRequestEvent request = createValidRequest();
+        
+        ArgumentCaptor<PutItemRequest> requestCaptor = ArgumentCaptor.forClass(PutItemRequest.class);
+        when(mockDynamoDb.putItem((PutItemRequest) any()))
+                .thenReturn(PutItemResponse.builder().build());
+        
+        // Act
+        APIGatewayProxyResponseEvent response = handler.handleRequest(request, mockContext);
+        
+        // Assert
+        verify(mockDynamoDb).putItem(requestCaptor.capture());
+        PutItemRequest capturedRequest = requestCaptor.getValue();
+        assertEquals(TEST_TABLE_NAME, capturedRequest.tableName());
+        
+        Map<String, AttributeValue> item = capturedRequest.item();
+        
+        // Verify partition key (user_id)
+        assertTrue(item.containsKey("user_id"));
+        assertEquals(TEST_USER_ID, item.get("user_id").s());
+        
+        // Verify sort key (itinerary_id)
+        assertTrue(item.containsKey("itinerary_id"));
+        assertTrue(item.get("itinerary_id").s().startsWith("itin_"));
+        
+        // Verify other attributes
+        assertTrue(item.containsKey("name"));
+        assertEquals("My Italy Adventure", item.get("name").s());
+        assertTrue(item.containsKey("itinerary_data"));
+        assertTrue(item.containsKey("created_at"));
+        assertTrue(item.containsKey("last_modified"));
+    }
+    
+    @Test
+    void testMissingNameValidation() throws Exception {
+        // Arrange
+        APIGatewayProxyRequestEvent request = createValidRequest();
+        Map<String, Object> requestBody = objectMapper.readValue(request.getBody(), Map.class);
+        requestBody.remove("name");
+        request.setBody(objectMapper.writeValueAsString(requestBody));
+        
+        // Act
+        APIGatewayProxyResponseEvent response = handler.handleRequest(request, mockContext);
+        
+        // Assert
+        assertEquals(400, response.getStatusCode());
+        assertTrue(response.getBody().contains("Name is required"));
+        verify(mockDynamoDb, never()).putItem((PutItemRequest) any());
+    }
+    
+    @Test
+    void testEmptyNameValidation() throws Exception {
+        // Arrange
+        APIGatewayProxyRequestEvent request = createValidRequest();
+        Map<String, Object> requestBody = objectMapper.readValue(request.getBody(), Map.class);
+        requestBody.put("name", "   ");
+        request.setBody(objectMapper.writeValueAsString(requestBody));
+        
+        // Act
+        APIGatewayProxyResponseEvent response = handler.handleRequest(request, mockContext);
+        
+        // Assert
+        assertEquals(400, response.getStatusCode());
+        assertTrue(response.getBody().contains("Name must not be empty"));
+        verify(mockDynamoDb, never()).putItem((PutItemRequest) any());
+    }
+    
+    @Test
+    void testNameTooLongValidation() throws Exception {
+        // Arrange
+        APIGatewayProxyRequestEvent request = createValidRequest();
+        Map<String, Object> requestBody = objectMapper.readValue(request.getBody(), Map.class);
+        String longName = "a".repeat(201);
+        requestBody.put("name", longName);
+        request.setBody(objectMapper.writeValueAsString(requestBody));
+        
+        // Act
+        APIGatewayProxyResponseEvent response = handler.handleRequest(request, mockContext);
+        
+        // Assert
+        assertEquals(400, response.getStatusCode());
+        assertTrue(response.getBody().contains("200 characters or less"));
+        verify(mockDynamoDb, never()).putItem((PutItemRequest) any());
+    }
+    
+    @Test
+    void testMissingDaysValidation() throws Exception {
+        // Arrange
+        APIGatewayProxyRequestEvent request = createValidRequest();
+        Map<String, Object> requestBody = objectMapper.readValue(request.getBody(), Map.class);
+        requestBody.remove("days");
+        request.setBody(objectMapper.writeValueAsString(requestBody));
+        
+        // Act
+        APIGatewayProxyResponseEvent response = handler.handleRequest(request, mockContext);
+        
+        // Assert
+        assertEquals(400, response.getStatusCode());
+        assertTrue(response.getBody().contains("Days array is required"));
+        verify(mockDynamoDb, never()).putItem((PutItemRequest) any());
+    }
+    
+    @Test
+    void testIncorrectDaysCountValidation() throws Exception {
+        // Arrange
+        APIGatewayProxyRequestEvent request = createValidRequest();
+        Map<String, Object> requestBody = objectMapper.readValue(request.getBody(), Map.class);
+        
+        List<DayPlan> twoDays = new ArrayList<>();
+        twoDays.add(new DayPlan(1));
+        twoDays.add(new DayPlan(2));
+        requestBody.put("days", twoDays);
+        
+        request.setBody(objectMapper.writeValueAsString(requestBody));
+        
+        // Act
+        APIGatewayProxyResponseEvent response = handler.handleRequest(request, mockContext);
+        
+        // Assert
+        assertEquals(400, response.getStatusCode());
+        assertTrue(response.getBody().contains("Exactly 3 days are required"));
+        verify(mockDynamoDb, never()).putItem((PutItemRequest) any());
+    }
+    
+    @Test
+    void testEmptyRequestBody() {
+        // Arrange
+        APIGatewayProxyRequestEvent request = new APIGatewayProxyRequestEvent();
+        request.setBody("");
+        
+        // Set up authorizer context
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("sub", TEST_USER_ID);
+        Map<String, Object> authorizer = new HashMap<>();
+        authorizer.put("claims", claims);
+        APIGatewayProxyRequestEvent.ProxyRequestContext requestContext = new APIGatewayProxyRequestEvent.ProxyRequestContext();
+        requestContext.setAuthorizer(authorizer);
+        request.setRequestContext(requestContext);
+        
+        // Act
+        APIGatewayProxyResponseEvent response = handler.handleRequest(request, mockContext);
+        
+        // Assert
+        assertEquals(400, response.getStatusCode());
+        assertTrue(response.getBody().contains("Request body is required"));
+        verify(mockDynamoDb, never()).putItem((PutItemRequest) any());
+    }
+    
+    @Test
+    void testInvalidJsonBody() {
+        // Arrange
+        APIGatewayProxyRequestEvent request = new APIGatewayProxyRequestEvent();
+        request.setBody("{invalid json");
+        
+        // Set up authorizer context
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("sub", TEST_USER_ID);
+        Map<String, Object> authorizer = new HashMap<>();
+        authorizer.put("claims", claims);
+        APIGatewayProxyRequestEvent.ProxyRequestContext requestContext = new APIGatewayProxyRequestEvent.ProxyRequestContext();
+        requestContext.setAuthorizer(authorizer);
+        request.setRequestContext(requestContext);
+        
+        // Act
+        APIGatewayProxyResponseEvent response = handler.handleRequest(request, mockContext);
+        
+        // Assert
+        assertEquals(400, response.getStatusCode());
+        assertTrue(response.getBody().contains("Invalid JSON"));
+        verify(mockDynamoDb, never()).putItem((PutItemRequest) any());
+    }
+    
+    @Test
+    void testMissingAuthorizerContext() {
+        // Arrange
+        APIGatewayProxyRequestEvent request = new APIGatewayProxyRequestEvent();
+        request.setBody("{\"name\":\"Test\",\"days\":[]}");
+        
+        APIGatewayProxyRequestEvent.ProxyRequestContext requestContext = new APIGatewayProxyRequestEvent.ProxyRequestContext();
+        request.setRequestContext(requestContext);
+        
+        // Act
+        APIGatewayProxyResponseEvent response = handler.handleRequest(request, mockContext);
+        
+        // Assert
+        assertEquals(401, response.getStatusCode());
+        assertTrue(response.getBody().contains("Unauthorized"));
+        verify(mockDynamoDb, never()).putItem((PutItemRequest) any());
+    }
+    
+    @Test
+    void testDynamoDbError() throws Exception {
+        // Arrange
+        APIGatewayProxyRequestEvent request = createValidRequest();
+        
+        when(mockDynamoDb.putItem((PutItemRequest) any()))
+                .thenThrow(DynamoDbException.builder()
+                        .message("Database error")
+                        .build());
+        
+        // Act
+        APIGatewayProxyResponseEvent response = handler.handleRequest(request, mockContext);
+        
+        // Assert
+        assertEquals(500, response.getStatusCode());
+        assertTrue(response.getBody().contains("Failed to create itinerary") || response.getBody().contains("Database error") || response.getBody().contains("error"));
+    }
+    
+    @Test
+    void testCorsHeadersInResponse() throws Exception {
+        // Arrange
+        APIGatewayProxyRequestEvent request = createValidRequest();
+        
+        when(mockDynamoDb.putItem((PutItemRequest) any()))
+                .thenReturn(PutItemResponse.builder().build());
+        
+        // Act
+        APIGatewayProxyResponseEvent response = handler.handleRequest(request, mockContext);
+        
+        // Assert
+        assertNotNull(response.getHeaders());
+        assertTrue(response.getHeaders().containsKey("Access-Control-Allow-Origin"));
+        assertEquals("*", response.getHeaders().get("Access-Control-Allow-Origin"));
+        assertTrue(response.getHeaders().containsKey("Content-Type"));
+        assertEquals("application/json", response.getHeaders().get("Content-Type"));
+    }
+}

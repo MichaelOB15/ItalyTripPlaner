@@ -1,0 +1,482 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+ * Keyboard Navigation & Accessibility Enhancements
+ * ============================================================================
+ * 
+ * **Validates: Requirements 14.2, 14.5**
+ * 
+ * Features:
+ * - Visible focus indicators for all interactive elements
+ * - Enhanced focus rings with better contrast
+ * - Skip link styles for screen readers
+ * - Keyboard-only focus styles (no mouse click focus ring)
+ */
+
+/* Enhanced focus indicators for all interactive elements */
+*:focus-visible {
+  outline: 3px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Buttons - visible focus ring */
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Form inputs - visible focus ring */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid #3b82f6;
+  outline-offset: 0px;
+  border-color: #3b82f6;
+}
+
+/* Card-like interactive elements */
+[role="button"]:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid #3b82f6;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+/* Ensure checkboxes and radio buttons have visible focus */
+input[type="checkbox"]:focus-visible,
+input[type="radio"]:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Remove default focus outline for mouse users, keep for keyboard users */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Print styles for focus indicators - hide in print */
+@media print {
+  *:focus-visible {
+    outline: none;
+  }
+}
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+/* ============================================================================
+ * Print Styles for Italy Trip Planner
+ * Requirements: 8.7, 8.8, 8.9, 8.10
+ * ============================================================================
+ * 
+ * These styles create a print-friendly view of the itinerary that:
+ * - Hides navigation, filters, and UI controls
+ * - Shows only itinerary content
+ * - Formats for standard 8.5" x 11" paper
+ * - Includes page breaks between days
+ * - Uses readable fonts and sizing
+ * - Adds print-specific header with trip details
+ */
+
+@media print {
+  /* ========================================================================
+   * Page Setup - Standard Letter Size (8.5" x 11")
+   * ======================================================================== */
+  @page {
+    size: letter;
+    margin: 0.75in 0.5in;
+  }
+
+  /* ========================================================================
+   * Global Print Resets
+   * ======================================================================== */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 11pt;
+    line-height: 1.4;
+  }
+
+  /* ========================================================================
+   * Hide Non-Essential UI Elements (Req 8.8)
+   * ======================================================================== */
+  
+  /* Hide header/navigation */
+  header,
+  [role="banner"],
+  nav,
+  [role="navigation"] {
+    display: none !important;
+  }
+
+  /* Hide place explorer/browser */
+  [aria-label="Place Explorer"],
+  [aria-label*="Place Browser"],
+  [aria-label*="Filter"],
+  .place-explorer,
+  .filter-panel,
+  .search-bar {
+    display: none !important;
+  }
+
+  /* Hide map view */
+  [aria-label="Map View"],
+  .map-view,
+  .leaflet-container {
+    display: none !important;
+  }
+
+  /* Hide all buttons and interactive controls (Req 8.8) */
+  button,
+  .button,
+  [role="button"] {
+    display: none !important;
+  }
+
+  /* Hide drag-and-drop indicators */
+  .drag-handle,
+  .drop-zone,
+  [draggable] {
+    cursor: default !important;
+  }
+
+  /* Hide modals, dialogs, toasts */
+  [role="dialog"],
+  [role="alertdialog"],
+  .modal,
+  .toast,
+  .notification {
+    display: none !important;
+  }
+
+  /* Hide loading indicators and errors */
+  [role="status"],
+  [role="alert"],
+  .loading,
+  .error-message {
+    display: none !important;
+  }
+
+  /* ========================================================================
+   * Show Only Itinerary Content (Req 8.7)
+   * ======================================================================== */
+  
+  /* Ensure itinerary panel is visible and full width */
+  [aria-label="Itinerary Panel"],
+  .itinerary-panel {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Remove grid layout - make content linear */
+  .grid {
+    display: block !important;
+  }
+
+  /* Hide sections that aren't the itinerary */
+  main > section:not([aria-label="Itinerary Panel"]) {
+    display: none !important;
+  }
+
+  /* ========================================================================
+   * Print-Specific Header with Trip Details (Req 8.10)
+   * ======================================================================== */
+  
+  /* Add print header before itinerary content */
+  .itinerary-panel::before,
+  [aria-label="Itinerary Panel"]::before {
+    content: attr(data-trip-name);
+    display: block;
+    font-size: 20pt;
+    font-weight: bold;
+    margin-bottom: 0.5in;
+    padding-bottom: 0.15in;
+    border-bottom: 2pt solid #333;
+    text-align: center;
+  }
+
+  /* ========================================================================
+   * Day Plan Formatting (Req 8.9)
+   * ======================================================================== */
+  
+  /* Page break between days (Req 8.10) */
+  .day-plan:not(:first-child),
+  [role="region"][aria-label*="Day"]:not(:first-child) {
+    page-break-before: always;
+    break-before: page;
+  }
+
+  /* Day container styling */
+  .day-plan,
+  [role="region"][aria-label*="Day"] {
+    background: white !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin-bottom: 0.25in;
+  }
+
+  /* Day headers */
+  .day-plan h2,
+  [role="region"][aria-label*="Day"] h2 {
+    font-size: 16pt;
+    font-weight: bold;
+    margin-top: 0;
+    margin-bottom: 0.2in;
+    padding-bottom: 0.1in;
+    border-bottom: 1pt solid #666;
+    color: black !important;
+  }
+
+  /* Day summary stats */
+  .day-plan [class*="text-sm"],
+  .day-plan [class*="text-gray"] {
+    font-size: 9pt !important;
+    color: #555 !important;
+    margin-bottom: 0.15in;
+  }
+
+  /* Warning messages (overloaded days) */
+  .day-plan [class*="bg-orange"],
+  .day-plan [class*="text-orange"] {
+    background: #fff3cd !important;
+    border: 1pt solid #ffc107 !important;
+    color: #856404 !important;
+    padding: 0.1in;
+    margin-bottom: 0.15in;
+    font-size: 9pt;
+  }
+
+  /* ========================================================================
+   * Place Card Styling (Req 8.9, 8.10)
+   * ======================================================================== */
+  
+  /* Place cards in list */
+  .draggable-place,
+  [role="listitem"] {
+    background: white !important;
+    border: 1pt solid #ddd !important;
+    padding: 0.15in !important;
+    margin-bottom: 0.1in;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Place card layout */
+  .draggable-place {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Place name/title */
+  .draggable-place [class*="font-semibold"],
+  [role="listitem"] [class*="font-semibold"] {
+    font-size: 11pt !important;
+    font-weight: bold !important;
+    color: black !important;
+    margin-bottom: 0.05in;
+  }
+
+  /* Place details (time, duration, city, type) */
+  .draggable-place [class*="text-xs"],
+  .draggable-place [class*="text-sm"],
+  [role="listitem"] [class*="text-xs"],
+  [role="listitem"] [class*="text-sm"] {
+    font-size: 9pt !important;
+    color: #555 !important;
+    line-height: 1.3;
+  }
+
+  /* Place description */
+  .draggable-place p,
+  [role="listitem"] p {
+    font-size: 9pt !important;
+    color: #333 !important;
+    margin-top: 0.05in;
+    margin-bottom: 0;
+  }
+
+  /* Time slots */
+  .time-slot,
+  [class*="time"] {
+    font-weight: bold !important;
+    color: black !important;
+  }
+
+  /* ========================================================================
+   * Icons and Visual Elements
+   * ======================================================================== */
+  
+  /* Hide most icons except informational ones */
+  svg[aria-hidden="true"] {
+    display: none !important;
+  }
+
+  /* Keep informational icons but make them print-friendly */
+  svg:not([aria-hidden]) {
+    width: 10pt;
+    height: 10pt;
+    color: #555 !important;
+  }
+
+  /* ========================================================================
+   * Typography and Readability (Req 8.10)
+   * ======================================================================== */
+  
+  /* Ensure readable fonts */
+  * {
+    font-family: 'Times New Roman', Times, serif !important;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Arial', 'Helvetica', sans-serif !important;
+  }
+
+  /* Improve text contrast */
+  .text-gray-500,
+  .text-gray-600,
+  .text-gray-700 {
+    color: #555 !important;
+  }
+
+  .text-gray-400 {
+    color: #777 !important;
+  }
+
+  /* ========================================================================
+   * Empty State Handling
+   * ======================================================================== */
+  
+  /* Hide empty state messages when printing */
+  [class*="empty-state"],
+  .day-plan:empty,
+  [role="region"][aria-label*="Day"]:empty {
+    display: none !important;
+  }
+
+  /* ========================================================================
+   * Lists and Spacing
+   * ======================================================================== */
+  
+  /* List containers */
+  [role="list"],
+  .space-y-2 {
+    margin-top: 0.15in;
+  }
+
+  /* Remove excessive padding/margins */
+  .p-4, .p-6, .px-6, .py-4 {
+    padding: 0 !important;
+  }
+
+  .m-4, .m-6, .mx-6, .my-4 {
+    margin: 0 !important;
+  }
+
+  /* ========================================================================
+   * Responsive Grid Removal
+   * ======================================================================== */
+  
+  /* Remove all flexbox and grid for linear layout */
+  .flex,
+  .grid {
+    display: block !important;
+  }
+
+  .flex-col {
+    display: block !important;
+  }
+
+  /* ========================================================================
+   * Background Colors
+   * ======================================================================== */
+  
+  /* Remove background colors (save ink) */
+  .bg-gray-50,
+  .bg-gray-100,
+  .bg-blue-50 {
+    background: white !important;
+  }
+
+  /* Keep important backgrounds for context */
+  .bg-white {
+    background: white !important;
+  }
+
+  /* ========================================================================
+   * Borders and Shadows
+   * ======================================================================== */
+  
+  /* Simplify shadows for print */
+  .shadow,
+  .shadow-sm,
+  .shadow-md,
+  .shadow-lg,
+  .shadow-xl {
+    box-shadow: none !important;
+  }
+
+  /* Keep essential borders, remove decorative ones */
+  .border-gray-200,
+  .border-gray-300 {
+    border-color: #ccc !important;
+  }
+
+  .rounded,
+  .rounded-lg,
+  .rounded-md {
+    border-radius: 2pt !important;
+  }
+
+  /* ========================================================================
+   * Footer (Page Numbers)
+   * ======================================================================== */
+  
+  /* Optional: Add page numbers at bottom */
+  @page {
+    @bottom-center {
+      content: "Page " counter(page) " of " counter(pages);
+      font-size: 9pt;
+      color: #555;
+    }
+  }
+
+  /* ========================================================================
+   * Print Preview Helpers
+   * ======================================================================== */
+  
+  /* Ensure content starts at top of page */
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Remove scroll behavior */
+  body {
+    overflow: visible !important;
+  }
+}

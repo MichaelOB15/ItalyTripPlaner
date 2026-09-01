@@ -1,0 +1,151 @@
+import * as cdk from 'aws-cdk-lib';
+import { Template } from 'aws-cdk-lib/assertions';
+import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+
+describe('DynamoDB Table Configuration', () => {
+  test('DynamoDB table has correct partition and sort keys', () => {
+    const app = new cdk.App();
+    const stack = new cdk.Stack(app, 'TestStack');
+
+    // Create the DynamoDB table with the same configuration as in our infrastructure
+    const table = new dynamodb.Table(stack, 'ItinerariesTable', {
+      tableName: 'italy-trip-planner-itineraries',
+      partitionKey: { 
+        name: 'user_id', 
+        type: dynamodb.AttributeType.STRING 
+      },
+      sortKey: { 
+        name: 'itinerary_id', 
+        type: dynamodb.AttributeType.STRING 
+      },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      pointInTimeRecoverySpecification: {
+        pointInTimeRecoveryEnabled: true,
+      },
+      encryption: dynamodb.TableEncryption.AWS_MANAGED,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    });
+
+    const template = Template.fromStack(stack);
+
+    // Verify the table exists with correct properties
+    template.hasResourceProperties('AWS::DynamoDB::Table', {
+      TableName: 'italy-trip-planner-itineraries',
+      BillingMode: 'PAY_PER_REQUEST',
+      PointInTimeRecoverySpecification: {
+        PointInTimeRecoveryEnabled: true,
+      },
+      SSESpecification: {
+        SSEEnabled: true,
+      },
+      KeySchema: [
+        {
+          AttributeName: 'user_id',
+          KeyType: 'HASH',
+        },
+        {
+          AttributeName: 'itinerary_id',
+          KeyType: 'RANGE',
+        },
+      ],
+      AttributeDefinitions: [
+        {
+          AttributeName: 'user_id',
+          AttributeType: 'S',
+        },
+        {
+          AttributeName: 'itinerary_id',
+          AttributeType: 'S',
+        },
+      ],
+    });
+  });
+
+  test('DynamoDB table has correct billing mode', () => {
+    const app = new cdk.App();
+    const stack = new cdk.Stack(app, 'TestStack');
+
+    const table = new dynamodb.Table(stack, 'ItinerariesTable', {
+      tableName: 'italy-trip-planner-itineraries',
+      partitionKey: { 
+        name: 'user_id', 
+        type: dynamodb.AttributeType.STRING 
+      },
+      sortKey: { 
+        name: 'itinerary_id', 
+        type: dynamodb.AttributeType.STRING 
+      },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      pointInTimeRecovery: true,
+      encryption: dynamodb.TableEncryption.AWS_MANAGED,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    });
+
+    const template = Template.fromStack(stack);
+
+    // Verify on-demand billing mode
+    template.hasResourceProperties('AWS::DynamoDB::Table', {
+      BillingMode: 'PAY_PER_REQUEST',
+    });
+  });
+
+  test('DynamoDB table has point-in-time recovery enabled', () => {
+    const app = new cdk.App();
+    const stack = new cdk.Stack(app, 'TestStack');
+
+    const table = new dynamodb.Table(stack, 'ItinerariesTable', {
+      tableName: 'italy-trip-planner-itineraries',
+      partitionKey: { 
+        name: 'user_id', 
+        type: dynamodb.AttributeType.STRING 
+      },
+      sortKey: { 
+        name: 'itinerary_id', 
+        type: dynamodb.AttributeType.STRING 
+      },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      pointInTimeRecovery: true,
+      encryption: dynamodb.TableEncryption.AWS_MANAGED,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    });
+
+    const template = Template.fromStack(stack);
+
+    // Verify point-in-time recovery is enabled
+    template.hasResourceProperties('AWS::DynamoDB::Table', {
+      PointInTimeRecoverySpecification: {
+        PointInTimeRecoveryEnabled: true,
+      },
+    });
+  });
+
+  test('DynamoDB table has AWS-managed encryption', () => {
+    const app = new cdk.App();
+    const stack = new cdk.Stack(app, 'TestStack');
+
+    const table = new dynamodb.Table(stack, 'ItinerariesTable', {
+      tableName: 'italy-trip-planner-itineraries',
+      partitionKey: { 
+        name: 'user_id', 
+        type: dynamodb.AttributeType.STRING 
+      },
+      sortKey: { 
+        name: 'itinerary_id', 
+        type: dynamodb.AttributeType.STRING 
+      },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      pointInTimeRecovery: true,
+      encryption: dynamodb.TableEncryption.AWS_MANAGED,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    });
+
+    const template = Template.fromStack(stack);
+
+    // Verify AWS-managed encryption is enabled
+    template.hasResourceProperties('AWS::DynamoDB::Table', {
+      SSESpecification: {
+        SSEEnabled: true,
+      },
+    });
+  });
+});

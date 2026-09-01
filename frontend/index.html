@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Italy Trip Planner</title>
+    <style>
+      /* Skip link styles - hidden by default, visible on focus */
+      .skip-link {
+        position: absolute;
+        left: -9999px;
+        z-index: 999;
+        padding: 1em;
+        background-color: #000;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 0 0 0.25em 0;
+      }
+      .skip-link:focus {
+        left: 0;
+        top: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Skip Links for Accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <a href="#place-explorer" class="skip-link">Skip to place explorer</a>
+    <a href="#itinerary-panel" class="skip-link">Skip to itinerary</a>
+    <a href="#map-view" class="skip-link">Skip to map</a>
+    
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

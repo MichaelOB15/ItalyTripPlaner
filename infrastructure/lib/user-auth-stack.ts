@@ -2,6 +2,8 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
+import * as iam from 'aws-cdk-lib/aws-iam';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
 
 export class UserAuthStack extends cdk.Stack {
   public readonly userPool: cognito.UserPool;
@@ -14,6 +16,23 @@ export class UserAuthStack extends cdk.Stack {
     // Cognito User Pool
     // ===========================
 
+    // Create IAM role for Cognito to send emails via SES
+    const sesRole = new iam.Role(this, 'CognitoSESRole', {
+      assumedBy: new iam.ServicePrincipal('cognito-idp.amazonaws.com'),
+      description: 'Allow Cognito to send emails via SES',
+      inlinePolicies: {
+        'SESEmailSending': new iam.PolicyDocument({
+          statements: [
+            new iam.PolicyStatement({
+              effect: iam.Effect.ALLOW,
+              actions: ['ses:SendEmail', 'ses:SendRawEmail'],
+              resources: [`arn:aws:ses:${this.region}:${this.account}:identity/msobrien15@gmail.com`],
+            }),
+          ],
+        }),
+      },
+    });
+
     this.userPool = new cognito.UserPool(this, 'UserPool', {
       userPoolName: 'italy-trip-planner-users',
       selfSignUpEnabled: true,
@@ -21,7 +40,7 @@ export class UserAuthStack extends cdk.Stack {
         email: true,
       },
       autoVerify: {
-        email: true,
+        // No auto-verification required
       },
       standardAttributes: {
         email: {
@@ -38,12 +57,31 @@ export class UserAuthStack extends cdk.Stack {
         tempPasswordValidity: cdk.Duration.days(3),
       },
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
-      userVerification: {
-        emailSubject: 'Verify your Italy Trip Planner account',
-        emailBody: 'Thank you for signing up to Italy Trip Planner! Your verification code is {####}',
-        emailStyle: cognito.VerificationEmailStyle.CODE,
+      // Lambda trigger to auto-confirm users (bypass email verification)
+      lambdaTriggers: {
+        preSignUp: new lambda.Function(this, 'PreSignUpTrigger', {
+          runtime: lambda.Runtime.NODEJS_20_X,
+          handler: 'index.handler',
+          code: lambda.Code.fromInline(`
+            exports.handler = async (event) => {
+              // Auto-confirm user - no email verification required
+              event.response.autoConfirmUser = true;
+              event.response.autoVerifyEmail = true;
+              return event;
+            };
+          `),
+          description: 'Auto-confirm users on sign-up (no email verification)',
+        }),
       },
-      email: cognito.UserPoolEmail.withCognito(),
+      // Removed userVerification configuration - no verification code needed
+      email: cognito.UserPoolEmail.withSES({
+        fromEmail: 'msobrien15@gmail.com',
+        fromName: 'Italy Trip Planner',
+        replyTo: 'msobrien15@gmail.com',
+        sesRegion: this.region,
+        sesVerifiedDomain: undefined, // Using verified email, not domain
+        configurationSetName: undefined,
+      }),
       removalPolicy: cdk.RemovalPolicy.RETAIN, // Prevent accidental deletion of user data
     });
 

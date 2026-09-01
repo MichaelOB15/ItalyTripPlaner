@@ -420,7 +420,7 @@ export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
 
   /**
    * Sign up a new user with email and password.
-   * Creates a new Cognito user account and initiates email verification.
+   * Creates a new Cognito user account and automatically signs them in.
    * 
    * **Validates Requirements:**
    * - 1.1: Provides user registration functionality
@@ -442,11 +442,21 @@ export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
           userAttributes: {
             email,
           },
-          autoSignIn: false, // We'll handle sign-in separately after verification
+          autoSignIn: true, // Auto-sign-in after registration (no verification required)
         },
       });
 
       dispatch({ type: 'AUTH_CLEAR_ERROR' });
+
+      // If sign-up is complete (no verification required), automatically sign in
+      if (isSignUpComplete) {
+        try {
+          await signIn(email, password);
+        } catch (signInError) {
+          console.error('[AuthContext] Auto sign-in after sign-up failed:', signInError);
+          // Don't throw - user can manually sign in
+        }
+      }
 
       return {
         isSignUpComplete,

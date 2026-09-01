@@ -108,6 +108,8 @@ function AppContent() {
     try {
       createItinerary('My Italy Trip');
       console.log('[App] createItinerary called successfully');
+      // Navigate to itinerary tab to show the builder
+      setActiveTab('itinerary');
     } catch (error) {
       console.error('[App] Error creating itinerary:', error);
       showError('Failed to create itinerary');

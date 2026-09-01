@@ -2,14 +2,18 @@
 
 A full-stack serverless web application for creating personalized 3-day Italy itineraries with AI-powered recommendations and interactive editing.
 
+## 🌐 Live Application
+
 **Live Site:** https://d10xzq83e4ezkh.cloudfront.net
+
+Try it out! Create custom 3-day Italy itineraries with drag-and-drop editing and AI-powered recommendations.
 
 ---
 
-## Features
+## ✨ Features
 
 ### Core Functionality
-- ✨ **AI-Powered Recommendations** - Generate optimized 3-day itineraries based on preferences (cities, interests, pace, budget)
+- 🎯 **AI-Powered Recommendations** - Generate optimized 3-day itineraries based on preferences (cities, interests, pace, budget)
 - 🖱️ **Interactive Editing** - Drag-and-drop activities, reorder within days, move between days
 - 🔍 **Smart Filtering** - Search and filter 100+ Italian destinations by city, type, rating, price, tags
 - 📅 **Auto-Scheduling** - Automatic time calculations with 30-minute travel buffers
@@ -19,12 +23,48 @@ A full-stack serverless web application for creating personalized 3-day Italy it
 - 🌍 **Geographic Coherence** - Prevents mixing cities on the same day
 - 💾 **Auto-Save** - Changes automatically saved after 1 second
 
-### Technical Highlights
-- Serverless AWS architecture (Lambda + API Gateway + S3 + CloudFront)
-- React 18 with TypeScript and Tailwind CSS
-- Java 17 backend with Maven multi-module structure
-- Infrastructure as Code with AWS CDK
-- WCAG 2.1 AA accessibility compliant
+---
+
+## 🛠️ Tech Stack
+
+**Frontend:**
+- React 18.3 with TypeScript 5.6
+- Vite 5.4 (build tool)
+- Tailwind CSS 3.4
+- Axios 1.7 (HTTP client)
+- React DnD (drag-and-drop)
+
+**Backend:**
+- Java 17 with Maven 3.8
+- AWS Lambda (serverless compute)
+- API Gateway (REST API)
+- AWS SDK 2.21
+
+**Infrastructure:**
+- AWS CDK 2.x (TypeScript)
+- S3 (storage)
+- CloudFront (CDN)
+- DynamoDB (itinerary storage)
+- Cognito (authentication)
+- CloudWatch (logging)
+
+**Development:**
+- GitHub for version control
+- AWS CLI for deployment
+- Vitest for frontend testing
+- JUnit 5 for backend testing
+
+---
+
+## 🚀 Future Improvements
+
+- **Custom Datasets** - Upload your own place datasets with custom cities and activities
+- **Natural Language Chat** - Interact with and update itineraries using conversational AI
+- **Flexible Trip Length** - Build itineraries for any duration (not just 3 days)
+- **Custom Activities** - Add personal activities, restaurants, and points of interest
+- **Enhanced Maps** - Integrate interactive maps with routing between activities and estimated travel times
+- **Activity Images** - Display photos for each activity directly in the itinerary builder
+- **Export Options** - Download itineraries as PDF, share via link, or sync to calendar
 
 ---
 
@@ -161,8 +201,6 @@ aws cloudformation describe-stacks \
 - CloudWatch (logging)
 
 ---
-
-## Project Structure
 
 ```
 StripeInterview/

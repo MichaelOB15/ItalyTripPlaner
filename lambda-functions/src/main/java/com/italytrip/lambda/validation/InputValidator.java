@@ -147,8 +147,8 @@ public class InputValidator {
                 if (priceItem == null || priceItem.trim().isEmpty()) {
                     return ValidationResult.error("Preference price_range must not contain empty values");
                 }
-                if (!priceItem.equals("€") && !priceItem.equals("€€") && !priceItem.equals("€€€")) {
-                    return ValidationResult.error("Preference price_range items must be '€', '€€', or '€€€'");
+                if (!priceItem.equals("€") && !priceItem.equals("€€") && !priceItem.equals("€€€") && !priceItem.equals("€€€€")) {
+                    return ValidationResult.error("Preference price_range items must be '€', '€€', '€€€', or '€€€€'");
                 }
             }
         }
